@@ -11,13 +11,11 @@ using Microsoft.WindowsAzure.Storage;
 using Microsoft.WindowsAzure.Storage.Blob;
 using Microsoft.WindowsAzure.Storage.Table;
 
-namespace Microsoft.WindowsAzure.Mobile.Service.ResourceBroker.Providers
-{
+namespace Microsoft.WindowsAzure.Mobile.Service.ResourceBroker.Providers {
     /// <summary>
     /// Provides access to Azure Storage accounts.
     /// </summary>
-    public class StorageProvider
-    {
+    public class StorageProvider {
         private CloudStorageAccount storageAccount;
         private CloudBlobClient blobClient;
         private CloudTableClient tableClient;
@@ -26,10 +24,8 @@ namespace Microsoft.WindowsAzure.Mobile.Service.ResourceBroker.Providers
         /// Initializes a new instance of the StorageProvider class.
         /// </summary>
         /// <param name="connectionString">The storage connection string.</param>
-        public StorageProvider(string connectionString)
-        {
-            if (string.IsNullOrWhiteSpace(connectionString))
-            {
+        public StorageProvider(string connectionString) {
+            if (string.IsNullOrWhiteSpace(connectionString)) {
                 throw new ArgumentException("Cannot be null or empty", "connectionString");
             }
 
@@ -39,12 +35,9 @@ namespace Microsoft.WindowsAzure.Mobile.Service.ResourceBroker.Providers
         /// <summary>
         /// Gets the blob client.
         /// </summary>
-        private CloudBlobClient BlobClient
-        {
-            get
-            {
-                if (this.blobClient == null)
-                {
+        private CloudBlobClient BlobClient {
+            get {
+                if (this.blobClient == null) {
                     this.blobClient = this.storageAccount.CreateCloudBlobClient();
                 }
 
@@ -55,12 +48,9 @@ namespace Microsoft.WindowsAzure.Mobile.Service.ResourceBroker.Providers
         /// <summary>
         /// Gets the table client.
         /// </summary>
-        public CloudTableClient TableClient
-        {
-            get
-            {
-                if (this.tableClient == null)
-                {
+        private CloudTableClient TableClient {
+            get {
+                if (this.tableClient == null) {
                     this.tableClient = this.storageAccount.CreateCloudTableClient();
                 }
 
@@ -76,15 +66,12 @@ namespace Microsoft.WindowsAzure.Mobile.Service.ResourceBroker.Providers
         /// <param name="permissions">The permissions to apply to the blob.</param>
         /// <param name="expiration">The expiration time for the token.</param>
         /// <returns>Returns the blob's URI access string.</returns>
-        public ResourceToken CreateBlobAccessToken(string containerName, string blobName, ResourcePermissions permissions, DateTime? expiration = null)
-        {
-            if (string.IsNullOrWhiteSpace(containerName))
-            {
+        public ResourceToken CreateBlobAccessToken(string containerName, string blobName, ResourcePermissions permissions, DateTime? expiration = null) {
+            if (string.IsNullOrWhiteSpace(containerName)) {
                 throw new ArgumentException("must not be null or empty", "containerName");
             }
 
-            if (string.IsNullOrWhiteSpace(blobName))
-            {
+            if (string.IsNullOrWhiteSpace(blobName)) {
                 throw new ArgumentException("must not be null or empty", "blobName");
             }
 
@@ -111,10 +98,8 @@ namespace Microsoft.WindowsAzure.Mobile.Service.ResourceBroker.Providers
         /// <param name="permissions">The permissions to apply to the table.</param>
         /// <param name="expiration">The expiration time for the token.</param>
         /// <returns>Returns the blob's URI access string.</returns>
-        public ResourceToken CreateTableAccessToken(string tableName, ResourcePermissions permissions, DateTime? expiration = null)
-        {
-            if (string.IsNullOrWhiteSpace(tableName))
-            {
+        public ResourceToken CreateTableAccessToken(string tableName, ResourcePermissions permissions, DateTime? expiration = null) {
+            if (string.IsNullOrWhiteSpace(tableName)) {
                 throw new ArgumentException("must not be null or empty", "tableName");
             }
 
@@ -137,37 +122,35 @@ namespace Microsoft.WindowsAzure.Mobile.Service.ResourceBroker.Providers
         /// <param name="permissions">The permission set.</param>
         /// <param name="expiration">The expiration time.</param>
         /// <returns>Returns the access policy.</returns>
-        private static SharedAccessBlobPolicy GetBlobSasConstraints(ResourcePermissions permissions, DateTime? expiration)
-        {
+        private static SharedAccessBlobPolicy GetBlobSasConstraints(ResourcePermissions permissions, DateTime? expiration) {
             SharedAccessBlobPolicy sasConstraints = new SharedAccessBlobPolicy();
 
             // Set the start time to five minutes in the past.
             sasConstraints.SharedAccessStartTime = DateTimeOffset.Now - TimeSpan.FromMinutes(5);
 
             // Expiration.
-            if (expiration != null)
-            {
+            if (expiration != null) {
                 sasConstraints.SharedAccessExpiryTime = expiration.Value;
             }
 
             // Permissions.
             sasConstraints.Permissions = SharedAccessBlobPermissions.None;
-            if ((permissions & ResourcePermissions.Read) == ResourcePermissions.Read)
-            {
+
+            if ((permissions & ResourcePermissions.Read) == ResourcePermissions.Read) {
                 sasConstraints.Permissions |= SharedAccessBlobPermissions.Read;
             }
 
-            if ((permissions & ResourcePermissions.Write) == ResourcePermissions.Write)
-            {
+            if ((permissions & ResourcePermissions.Write) == ResourcePermissions.Write) {
                 sasConstraints.Permissions |= SharedAccessBlobPermissions.Write;
             }
-            else
-            {
+
+            else {
                 if ((permissions & ResourcePermissions.Add) == ResourcePermissions.Add ||
-                    (permissions & ResourcePermissions.Update) == ResourcePermissions.Update ||
-                    (permissions & ResourcePermissions.Delete) == ResourcePermissions.Delete)
-                {
-                    throw new HttpResponseException(new HttpResponseMessage(HttpStatusCode.BadRequest) { Content = new StringContent("Blobs do not support Add, Update, or Delete permissions. Use the Write permission instead.") });
+                        (permissions & ResourcePermissions.Update) == ResourcePermissions.Update ||
+                        (permissions & ResourcePermissions.Delete) == ResourcePermissions.Delete) {
+                    throw new HttpResponseException(new HttpResponseMessage(HttpStatusCode.BadRequest) {
+                        Content = new StringContent("Blobs do not support Add, Update, or Delete permissions. Use the Write permission instead.")
+                    });
                 }
             }
 
@@ -180,38 +163,33 @@ namespace Microsoft.WindowsAzure.Mobile.Service.ResourceBroker.Providers
         /// <param name="permissions">The permission set.</param>
         /// <param name="expiration">The expiration time.</param>
         /// <returns>Returns the access policy.</returns>
-        private static SharedAccessTablePolicy GetTableSasConstraints(ResourcePermissions permissions, DateTime? expiration)
-        {
+        private static SharedAccessTablePolicy GetTableSasConstraints(ResourcePermissions permissions, DateTime? expiration) {
             SharedAccessTablePolicy sasConstraints = new SharedAccessTablePolicy();
 
             // Set the start time to five minutes in the past.
             sasConstraints.SharedAccessStartTime = DateTimeOffset.Now - TimeSpan.FromMinutes(5);
 
             // Expiration.
-            if (expiration != null)
-            {
+            if (expiration != null) {
                 sasConstraints.SharedAccessExpiryTime = expiration.Value;
             }
 
             // Permissions.
             sasConstraints.Permissions = SharedAccessTablePermissions.None;
-            if ((permissions & ResourcePermissions.Read) == ResourcePermissions.Read)
-            {
+
+            if ((permissions & ResourcePermissions.Read) == ResourcePermissions.Read) {
                 sasConstraints.Permissions |= SharedAccessTablePermissions.Query;
             }
 
-            if ((permissions & ResourcePermissions.Add) == ResourcePermissions.Add)
-            {
+            if ((permissions & ResourcePermissions.Add) == ResourcePermissions.Add) {
                 sasConstraints.Permissions |= SharedAccessTablePermissions.Add;
             }
 
-            if ((permissions & ResourcePermissions.Update) == ResourcePermissions.Update)
-            {
+            if ((permissions & ResourcePermissions.Update) == ResourcePermissions.Update) {
                 sasConstraints.Permissions |= SharedAccessTablePermissions.Update;
             }
 
-            if ((permissions & ResourcePermissions.Delete) == ResourcePermissions.Delete)
-            {
+            if ((permissions & ResourcePermissions.Delete) == ResourcePermissions.Delete) {
                 sasConstraints.Permissions |= SharedAccessTablePermissions.Delete;
             }
 
